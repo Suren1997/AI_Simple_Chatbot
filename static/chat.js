@@ -1,46 +1,96 @@
-let chatBox = document.getElementById("chat");
-let messageInput = document.getElementById("message");
-let sendButton = document.getElementById("send-btn");
+const chatBox = document.getElementById("chat");
+const messageInput = document.getElementById("message");
+const sendButton = document.getElementById("send-btn");
 
 function addMessage(text, who) {
-  let newMessage = document.createElement("div");
-  newMessage.className = "message" + who;
-  newMessage.innerText = text;
-  chatBox.appendChild(newMessage);
+  const message = document.createElement("div");
+  message.className = `message ${who}`;
+
+  const avatar = document.createElement("div");
+  avatar.className = "avatar";
+  avatar.innerText = who === "user" ? "👤" : "🤖";
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  bubble.innerText = text;
+
+  message.appendChild(avatar);
+  message.appendChild(bubble);
+
+  chatBox.appendChild(message);
+
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-function sendMessage() {
-  let text = messageInput.value;
+function showTyping() {
+  const typing = document.createElement("div");
+  typing.className = "message bot";
+  typing.id = "typing";
 
-  if (text === "") {
-    return;
+  typing.innerHTML = `
+        <div class="avatar">🤖</div>
+        <div class="bubble">
+            <div class="typing">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    `;
+
+  chatBox.appendChild(typing);
+
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function removeTyping() {
+  const typing = document.getElementById("typing");
+
+  if (typing) {
+    typing.remove();
   }
+}
+
+async function sendMessage() {
+  const text = messageInput.value.trim();
+
+  if (!text) return;
 
   addMessage(text, "user");
 
   messageInput.value = "";
 
-  // addMessage("I hear you! we will connect this to flask max", "bot");
-  fetch("/chat", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ message: text }),
-  })
-    .then(function (response) {
-      return response.json();
-    })
-    .then(function (data) {
-      addMessage(data.reply, "bot");
+  showTyping();
+
+  try {
+    const response = await fetch("/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: text,
+      }),
     });
+
+    const data = await response.json();
+
+    removeTyping();
+
+    addMessage(data.reply, "bot");
+  } catch (error) {
+    removeTyping();
+
+    addMessage("Sorry, something went wrong. Please try again.", "bot");
+
+    console.error(error);
+  }
 }
 
-sendButton.onclick = sendMessage;
+sendButton.addEventListener("click", sendMessage);
 
-messageInput.onkeydown = function (event) {
-  if (event.key == "Enter") {
+messageInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
     sendMessage();
   }
-};
+});

@@ -1,33 +1,55 @@
 <!DOCTYPE html>
+<html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <title>Flask Chatbot</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant</title>
 
     <link rel="stylesheet" href="{{ url_for('static',filename='style.css') }}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 
 <body>
-    <div class="app">
-        <header class="app-header">
-            <h1>AI Chat</h1>
-            <p>Powered by Flask</p>
+
+    <div class="chat-container">
+
+        <header class="header">
+            <div class="logo">🤖</div>
+
+            <div>
+                <h2>AI Assistant</h2>
+                <span>Powered by Gemini AI</span>
+            </div>
         </header>
 
-        <main class="chat-window" id="chat">
+        <main id="chat" class="chat-box">
+
             <div class="message bot">
-                Hello! I'm your AI assistant.
+                <div class="avatar">🤖</div>
+                <div class="bubble">
+                    Hello 👋 How can I help you today?
+                </div>
             </div>
+
         </main>
 
-        <footer class="chat-input">
-            <input id="message" type="text" placeholder="Type your message..." />
-            <button id="send-btn">Send</button>
+        <footer class="input-area">
+
+            <input id="message" type="text" placeholder="Ask me anything...">
+
+            <button id="send-btn">
+                ➤
+            </button>
+
         </footer>
 
     </div>
 
     <script src="{{ url_for('static',filename='chat.js')}}"></script>
+
 </body>
 
 </html>

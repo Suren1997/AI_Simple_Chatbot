@@ -9,7 +9,14 @@ client = genai.Client(
     api_key=os.getenv("GEMINI_AI_KEY")
 )
 
-app = Flask(__name__)
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+app = Flask(
+    __name__,
+    template_folder=os.path.join(BASE_DIR, "..", "templates"),
+    static_folder=os.path.join(BASE_DIR, "..", "static")
+)
 
 @app.route("/")
 def index():
@@ -21,26 +28,30 @@ def chat():
     try:
         data = request.get_json()
 
-        user_message = data.get("message", "")
+        if not data:
+            return jsonify({"error": "No request data"}), 400
+
+        user_message = data.get("message", "").strip()
+
+        if not user_message:
+            return jsonify({"error": "Message cannot be empty"}), 400
 
         response = client.models.generate_content(
             model="gemini-2.5-flash",
             contents=user_message
         )
 
-        reply = response.text
-
         return jsonify({
-            "reply": reply
+            "reply": response.text
         })
 
     except Exception as e:
-        print("ERROR:", e)
-
+        print(f"Gemini Error: {e}")
         return jsonify({
-            "reply": f"Error: {str(e)}"
+            "error": "Failed to generate response"
         }), 500
 
+app = app
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000)
